@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * Handles displaying the annotation block.
  *
@@ -22,14 +21,27 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_annotations extends block_base {
-
     /**
      * Initialise the block.
      */
     public function init() {
         $this->title = get_string('pluginname', 'block_annotations');
     }
-
+    /**
+     * All multiple instances of this block
+     * @return bool Returns false
+     */
+    function instance_allow_multiple() {
+        return false;
+    }
+    /**
+     * Gets required Javascript
+     */
+    function get_required_javascript() {
+        parent::get_required_javascript();
+        $this->page->requires->css('/lib/jquery/ui-1.11.4/jquery-ui.min.css');
+        $this->page->requires->js_call_amd('block_annotations/annotations', 'init');
+    }
     /**
      * Return the content of this block.
      *
@@ -41,7 +53,6 @@ class block_annotations extends block_base {
             return $this->content;
         }
 
-        $this->page->requires->js_call_amd('block_annotations/annotations', 'init');
         $this->content = new stdClass();
         $this->content->text = 'test';
         $this->content->footer = '';
@@ -49,5 +60,3 @@ class block_annotations extends block_base {
         return $this->content;
     }
 }
-
-
