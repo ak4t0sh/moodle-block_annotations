@@ -38,9 +38,13 @@ class block_annotations extends block_base {
      * Gets required Javascript
      */
     function get_required_javascript() {
+        global $USER;
         parent::get_required_javascript();
-        $this->page->requires->css('/lib/jquery/ui-1.11.4/jquery-ui.min.css');
-        $this->page->requires->js_call_amd('block_annotations/annotations', 'init');
+        $annotations = [];
+        if ($this->page->course->id > 1 ) {
+            $annotations = block_annotations_get_annotations($USER->id, $this->page->course->id);
+        }
+        $this->page->requires->js_call_amd('block_annotations/annotations', 'init', $annotations);
     }
     /**
      * Return the content of this block.
@@ -48,11 +52,10 @@ class block_annotations extends block_base {
      * @return stdClass the content
      */
     public function get_content() {
-
         if ($this->content !== null) {
             return $this->content;
         }
-
+        $this->page->requires->css('/lib/jquery/ui-1.11.4/jquery-ui.min.css');
         $this->content = new stdClass();
         $this->content->text = 'test';
         $this->content->footer = '';

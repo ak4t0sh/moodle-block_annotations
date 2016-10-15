@@ -34,7 +34,9 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
         // jshint devel:true
         console.log(URL);
     }
-    function init() {
+    function init(annotations) {
+        // jshint devel:true
+        console.log(annotations);
         str.get_string('view', 'block_annotations').done(function(s) {
             BUTTON_TEXT=s;
         }).fail(notification.exception);

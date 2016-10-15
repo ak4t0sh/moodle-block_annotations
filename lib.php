@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $objecttype
  * @return false|stdClass
  */
-function block_annotations_get_annotation($userid, $objectid=0, $objecttype=0) {
+function block_annotations_get_annotation($userid, $objectid, $objecttype) {
     global $DB;
     $fakeannotation = new stdClass();
     $fakeannotation->userid = $userid;
@@ -49,13 +49,20 @@ function block_annotations_get_annotation($userid, $objectid=0, $objecttype=0) {
     block_annotations_set_to_cache($annotation);
     return $annotation;
 }
+
+function block_annotations_get_annotations($userid, $courseid=0) {
+    global $DB;
+    // TODO
+    return [];
+}
+
 /**
- * @param int $userid
- * @param int $objectid
- * @param string $objecttype
- * @param string $description
- * @param int $courseid
- * @return stdClass $annotation
+ * @param $userid
+ * @param $objectid
+ * @param $objecttype
+ * @param $description
+ * @param $courseid
+ * @return stdClass
  */
 function block_annotations_add_annotation($userid, $objectid, $objecttype, $description, $courseid) {
     global $DB;
