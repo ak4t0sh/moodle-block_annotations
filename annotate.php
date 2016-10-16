@@ -55,7 +55,7 @@ switch ($mode) {
         $id = block_annotations_get_realobjectid($id, $type, $courseid);
         if ($id === false)
             throw Exception("Invalid objectid");
-        $annotation = block_annotations_add_annotation($USER->id, $id, $type, $description $courseid);
+        $annotation = block_annotations_add_annotation($USER->id, $id, $type, $description);
         break;
     case "edit" :
         $annotation = block_annotations_edit_annotation($id, $description);
