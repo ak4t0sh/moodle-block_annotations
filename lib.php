@@ -49,22 +49,30 @@ function block_annotations_get_annotation($userid, $objectid, $objecttype) {
     block_annotations_set_to_cache($annotation);
     return $annotation;
 }
-
 function block_annotations_get_annotations($userid, $courseid=0) {
     global $DB;
     // TODO
+    /*
+    $cached = cache::make('block_annotations', 'annotations');
+
+    $key = block_annotations_build_cache_key($fakeannotation);
+    if ($key && $cached->has($key))
+        return $cached->get($key);
+    */
+    if (!$courseid) {
+        return $DB->get_records('block_annotations', ['userid' => $userid]);
+    }
+
     return [];
 }
-
 /**
  * @param $userid
  * @param $objectid
  * @param $objecttype
  * @param $description
- * @param $courseid
  * @return stdClass
  */
-function block_annotations_add_annotation($userid, $objectid, $objecttype, $description, $courseid) {
+function block_annotations_add_annotation($userid, $objectid, $objecttype, $description) {
     global $DB;
     $annotation = new stdClass();
     $annotation->userid = $userid;
@@ -136,4 +144,20 @@ function block_annotations_get_realobjectid($objectid, $objecttable, $courseid) 
         $objectid = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $objectid]);
     }
     return $objectid;
+}
+function block_annotations_buildfakeobjectid($annotation) {
+    global $DB;
+    if ($annotation == 'course_sections') {
+        $annotation = $DB->get_field('course_sections', 'section', ['id' => $annotation->id]);
+    }
+    return $annotation;
+}
+function block_annotations_resolve_amd($course) {
+    switch($course->format) {
+        case "topics":
+            return 'block_annotations/format_topics';
+            break;
+        default:
+            throw new Exception("Unsupported format");
+    }
 }

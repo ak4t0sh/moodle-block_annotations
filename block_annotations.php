@@ -20,6 +20,11 @@
  * @copyright  2016 Arnaud Trouvé <ak4t0sh@free.fr>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once __DIR__.'/lib.php';
+
 class block_annotations extends block_base {
     /**
      * Initialise the block.
@@ -42,9 +47,9 @@ class block_annotations extends block_base {
         parent::get_required_javascript();
         $annotations = [];
         if ($this->page->course->id > 1 ) {
-            $annotations = block_annotations_get_annotations($USER->id, $this->page->course->id);
+            //$annotations = block_annotations_get_annotations($USER->id, $this->page->course->id);
+            $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $annotations);
         }
-        $this->page->requires->js_call_amd('block_annotations/annotations', 'init', $annotations);
     }
     /**
      * Return the content of this block.
