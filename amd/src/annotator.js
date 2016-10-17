@@ -25,33 +25,21 @@
 define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], function($, ui, config, str, notification) {
     "use strict";
     var URL = config.wwwroot + '/blocks/annotations/annotate.php';
-    var BUTTON_TEXT='';
-    var SAVE_TEXT='';
-    var CANCEL_TEXT='';
-    var CLOSE_TEXT='';
-    var notes='';
+    var BUTTON_TEXT = '';
+    var SAVE_TEXT = '';
+    var CANCEL_TEXT = '';
+    var CLOSE_TEXT = '';
+    var notes = '';
     var dialog;
-
-    str.get_string('view', 'block_annotations').done(function(s) {
-        BUTTON_TEXT=s;
-    }).fail(notification.exception);
-
-    str.get_string('save').done(function(s) {
-        SAVE_TEXT=s;
-    }).fail(SAVE_TEXT='save');
-    str.get_string('cancel').done(function(s) {
-        CANCEL_TEXT=s;
-    }).fail(CANCEL_TEXT='cancel');
-    str.get_string('close').done(function(s) {
-        CLOSE_TEXT=s;
-    }).fail(CLOSE_TEXT='close');
 
     function save() {
         var promise = $.Deferred();
         var data = {
-            objectid: $('#block_annotations-addform-objectid').val(),
-            objecttable: $('#block_annotations-addform-objecttable').val(),
-            courseid: $('#block_annotations-addform-courseid').val(),
+            mode: $('#block_annotations-form-mode').val(),
+            objectid: $('#block_annotations-form-objectid').val(),
+            objecttype: $('#block_annotations-form-objecttype').val(),
+            text: $('#block_annotations-form-text').val(),
+            courseid: $('#block_annotations-form-courseid').val(),
             sesskey: config.sesskey
         };
         var settings = {
@@ -66,52 +54,66 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
 
         return promise;
     }
-    function add(element, type, id, courseid) {
-        var courseattr = '';
-        if (typeof courseid !== "undefined" && courseid !== null) {
-            courseattr = 'data-courseid="'+courseid+'"';
-        }
+    function add(element, type, id) {
         // TODO if an annotation already exists add its id in data-id attr
-        element.append('<div class="annotations"><span data-objecttype="'+type+'" data-objectid="'+
-            id +'" '+courseattr+' class="btn">'+BUTTON_TEXT+'</span></div>');
+        element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="' +
+             id + '" class="btn">' + BUTTON_TEXT + '</span></div>');
     }
     function run() {
         $('.annotations span.btn').click(function() {
-            $('#block_annotations-addform-objectid').val($(this).attr('data-objectid'));
-            $('#block_annotations-addform-objecttable').val($(this).attr('data-objecttype'));
+            $('#block_annotations-form-objectid').val($(this).attr('data-objectid'));
+            $('#block_annotations-form-objecttype').val($(this).attr('data-objecttype'));
             dialog.dialog('open');
         });
     }
-    function init(annotations) {
+    function init(annotations, courseid) {
+        /*
+         * Load required strings
+         */
+        str.get_string('view', 'block_annotations').done(function(s) {
+            BUTTON_TEXT = s;
+        }).fail(notification.exception);
+
+        str.get_string('save', 'block_annotations').done(function(s) {
+            SAVE_TEXT = s;
+        }).fail(SAVE_TEXT = 'save');
+        str.get_string('cancel', 'block_annotations').done(function(s) {
+            CANCEL_TEXT = s;
+        }).fail(CANCEL_TEXT = 'cancel');
+        str.get_string('close', 'block_annotations').done(function(s) {
+            CLOSE_TEXT = s;
+        }).fail(CLOSE_TEXT = 'close');
+
         notes = annotations;
-        // jshint devel:true
-        console.log(annotations);
-        $('body').append('<div id="block_annotations-addform" title="Create annotation">'
-    +'<form>'
-    +'<fieldset>'
-    + '<input id="block_annotations-addform-objectid" type="hidden" name="objectid" value=""/>'
-    + '<input id="block_annotations-addform-objecttable" type="hidden" name="objecttable" value=""/>'
-    + '<input id="block_annotations-addform-courseid" type="hidden" name="courseid" value=""/>'
-    +'<label for="annotation">Annotation</label>'
-    +'<textarea name="annotation" id="annotation-textarea" ' +
+        var mode = "add";
+        // TODO change mode if annotation exists
+        $('body').append('<div id="block_annotations-form" title="Create annotation">'
+    + '<form>'
+    + '<fieldset>'
+    + '<input id="block_annotations-form-mode" type="hidden" name="mode" value="' + mode + '"/>'
+    + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
+    + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
+    + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
+    + '<label for="annotation">Annotation</label>'
+    + '<textarea name="text" id="block_annotations-form-text" ' +
             'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
-    +'<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
-    +'</fieldset>'
-    +'</form>'
-    +'</div>');
-        dialog = $('#block_annotations-addform').dialog({
+    + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
+    + '</fieldset>'
+    + '</form>'
+    + '</div>');
+        dialog = $('#block_annotations-form').dialog({
             autoOpen: false,
             height: 400,
             width: 350,
             modal: true,
             buttons: [
                  {
-                     text:SAVE_TEXT,
-                     click:save
+                     text: SAVE_TEXT,
+                     click: save
                  },
                 {
-                    text:CANCEL_TEXT,
-                    click:function() {
+                    text: CANCEL_TEXT,
+                    click: function() {
                         dialog.dialog('close');
                     }
                 }
@@ -124,6 +126,6 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
     return {
         add: add,
         init: init,
-        run:run
+        run: run
     };
 });

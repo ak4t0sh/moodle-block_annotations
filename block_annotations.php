@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once __DIR__.'/lib.php';
+require_once(__DIR__.'/lib.php');
 
 class block_annotations extends block_base {
     /**
@@ -36,19 +36,22 @@ class block_annotations extends block_base {
      * All multiple instances of this block
      * @return bool Returns false
      */
-    function instance_allow_multiple() {
+    public function instance_allow_multiple() {
         return false;
     }
     /**
      * Gets required Javascript
      */
-    function get_required_javascript() {
+    public function get_required_javascript() {
         global $USER;
         parent::get_required_javascript();
-        $annotations = [];
+        $params = [
+            'annotations' => [],
+            'courseid' => $this->page->course->id
+        ];
         if ($this->page->course->id > 1 ) {
-            //$annotations = block_annotations_get_annotations($USER->id, $this->page->course->id);
-            $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $annotations);
+            // $annotations = block_annotations_get_annotations($USER->id, $this->page->course->id);
+            $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $params);
         }
     }
     /**

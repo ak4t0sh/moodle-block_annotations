@@ -23,44 +23,43 @@
  */
 define('AJAX_SCRIPT', true);
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 // This should be accessed by only valid logged in user.
 require_login(null, false);
+require_sesskey();
 
 $mode = required_param('mode', PARAM_TEXT);
-$id = required_param('id', PARAM_INT);
-$description = required_param('description', PARAM_TEXT);
-
-switch ($mode) {
-    case "add" :
-        $type = required_param('objecttype', PARAM_TEXT);
-        $courseid = required_param('courseid', 0, PARAM_INT);
-        break;
-    case "edit" :
-        $type = optional_param('objecttype', PARAM_TEXT);
-        $courseid = optional_param('courseid', 0, PARAM_INT);
-        break;
-    default :
-        throw new Exception("Invalid mode value");
-}
+$text = required_param('text', PARAM_TEXT);
 
 // Start capturing output in case of broken plugins.
 ajax_capture_output();
 
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/block/annotations/annotate.php');
+
 $annotation = false;
 switch ($mode) {
     case "add" :
-        $id = block_annotations_get_realobjectid($id, $type, $courseid);
-        if ($id === false)
+        $objectid = required_param('objectid', PARAM_INT);
+        $type = required_param('objecttype', PARAM_TEXT);
+        $courseid = required_param('courseid', PARAM_INT);
+
+        $id = block_annotations_get_realobjectid($objectid, $type, $courseid);
+        if ($id === false) {
             throw Exception("Invalid objectid");
-        $annotation = block_annotations_add_annotation($USER->id, $id, $type, $description);
+        }
+        $annotation = block_annotations_add_annotation($USER->id, $id, $type, $text);
         break;
     case "edit" :
-        $annotation = block_annotations_edit_annotation($id, $description);
+        $id = required_param('id', PARAM_INT);
+        $annotation = block_annotations_edit_annotation($id, $text);
         break;
+    default :
+        throw new Exception("Invalid mode value");
 }
-block_annotations_set_to_cache($annotation);
+if ($annotation !== false) {
+    block_annotations_set_to_cache($annotation);
+}
 ajax_check_captured_output();
 echo json_encode($annotation);

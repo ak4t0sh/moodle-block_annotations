@@ -26,3 +26,6 @@ $string['annotations:addinstance'] = 'Add a new Annotations block';
 $string['annotations:myaddinstance'] = 'Add a new Annotations block to Dashboard';
 $string['pluginname'] = 'Annotations';
 $string['view'] = 'View';
+$string['save']="Save";
+$string['cancel']="Cancel";
+$string['close']="Close";

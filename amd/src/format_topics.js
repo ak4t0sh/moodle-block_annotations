@@ -24,14 +24,13 @@
  */
 define(['jquery', 'block_annotations/annotator'], function($, annotator) {
     "use strict";
-    function init(annotations) {
-        var courseid = $('body').attr();        // TODO
-        annotator.init(annotations);
+    function init(annotations, courseid) {
+        annotator.init(annotations, courseid);
         $('ul.section li.activity > div').each(function() {
-            annotator.add($(this), 'course_modules', $(this).closest('li.activity').attr('id').split('-')[1], courseid);
+            annotator.add($(this), 'course_modules', $(this).closest('li.activity').attr('id').split('-')[1]);
         });
         $('li.section[id^="section-"]').each(function() {
-            annotator.add($(this), 'course_sections', $(this).attr('id').split('-')[1], courseid);
+            annotator.add($(this), 'course_sections', $(this).attr('id').split('-')[1]);
         });
         annotator.run();
     }
