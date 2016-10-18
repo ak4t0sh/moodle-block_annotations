@@ -170,12 +170,11 @@ function block_annotations_buildfakeobjectid($annotation) {
     }
     return $annotation;
 }
+function block_annotations_get_available_amd_by_format() {
+    return [
+      'topics' =>  'block_annotations/format_topics'
+    ];
+}
 function block_annotations_resolve_amd($course) {
-    switch($course->format) {
-        case "topics":
-            return 'block_annotations/format_topics';
-            break;
-        default:
-            throw new Exception("Unsupported format");
-    }
+    return block_annotations_get_available_amd_by_format()[$course->format];
 }

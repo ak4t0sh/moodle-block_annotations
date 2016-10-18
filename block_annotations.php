@@ -46,7 +46,7 @@ class block_annotations extends block_base {
         global $USER;
         parent::get_required_javascript();
 
-        if ($this->page->course->id > 1 ) {
+        if ($this->page->course->id > 1  && $this->is_valid_course_format($this->page->course->format)) {
             $params = [
                 'annotations' => block_annotations_get_annotations_for_page($USER->id, $this->page->course->id),
                 'courseid' => $this->page->course->id
@@ -70,5 +70,8 @@ class block_annotations extends block_base {
         $this->content->footer = '';
 
         return $this->content;
+    }
+    public function is_valid_course_format($format) {
+        return array_key_exists($format, block_annotations_get_available_amd_by_format());
     }
 }
