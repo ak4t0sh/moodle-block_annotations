@@ -37,6 +37,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
         var promise = $.Deferred();
         var data = {
             mode: $('#block_annotations-form-mode').val(),
+            id: $('#block_annotations-form-id').val(),
             objectid: $('#block_annotations-form-objectid').val(),
             objecttype: $('#block_annotations-form-objecttype').val(),
             text: $('#block_annotations-form-text').val(),
@@ -72,7 +73,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             if (typeof idattr !== typeof undefined && idattr !== false && 0 !== idattr.lenght) {
                 var annotationkey = $(this).attr('data-objecttype') + "_" + $(this).attr('data-objectid');
                 $('#block_annotations-form-id').val(idattr);
-                $('#block_annotations-form-text').html(notes[annotationkey].text);
+                $('#block_annotations-form-text').val(notes[annotationkey].text);
                 $('#block_annotations-form-mode').val("edit");
             }
             else {
@@ -108,6 +109,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
     + '<form>'
     + '<fieldset>'
     + '<input id="block_annotations-form-mode" type="hidden" name="mode" value=""/>'
+    + '<input id="block_annotations-form-id" type="hidden" name="id" value=""/>'
     + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
     + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
     + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
@@ -137,6 +139,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             ],
             close: function() {
                 dialog.find('form')[0].reset();
+                $('#block_annotations-form-text').val("");
             }
         });
     }
