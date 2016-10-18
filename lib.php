@@ -71,6 +71,7 @@ function block_annotations_get_annotations($userid, $courseid=0) {
 function block_annotations_get_annotations_for_page($userid, $courseid=0) {
     $annotations = [];
     foreach (block_annotations_get_annotations($userid, $courseid) as $a) {
+        $a->objectid = block_annotations_buildfakeobjectid($a);
         $annotations[$a->objecttype . '_' . $a->objectid] = $a;
     }
     return $annotations;
@@ -159,16 +160,16 @@ function block_annotations_set_to_cache($annotation) {
 function block_annotations_get_realobjectid($objectid, $objecttype, $courseid) {
     global $DB;
     if ($objecttype == 'course_sections') {
-        $objectid = $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $objectid]);
+        return $DB->get_field('course_sections', 'id', ['course' => $courseid, 'section' => $objectid]);
     }
     return $objectid;
 }
 function block_annotations_buildfakeobjectid($annotation) {
     global $DB;
-    if ($annotation == 'course_sections') {
-        $annotation = $DB->get_field('course_sections', 'section', ['id' => $annotation->objectid]);
+    if ($annotation->objecttype == 'course_sections') {
+        return $DB->get_field('course_sections', 'section', ['id' => $annotation->objectid]);
     }
-    return $annotation;
+    return $annotation->objectid;
 }
 function block_annotations_get_available_amd_by_format() {
     return [
