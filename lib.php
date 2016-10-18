@@ -36,12 +36,12 @@ function block_annotations_get_annotation($userid, $objectid, $objecttype) {
     $fakeannotation->objectid = $objectid;
     $fakeannotation->objecttype = $objecttype;
     $key = block_annotations_build_cache_key($fakeannotation);
-
+/*
     $cached = cache::make('block_annotations', 'annotations');
     if ($key && $cached->has($key)) {
         return $cached->get($key);
     }
-
+*/
     $annotation = $DB->get_record('block_annotations', [
         'user' => $userid,
         'objectid' => $objectid,
@@ -60,23 +60,34 @@ function block_annotations_get_annotations($userid, $courseid=0) {
     if ($key && $cached->has($key))
         return $cached->get($key);
     */
+    $params = ['userid' => $userid];
     if (!$courseid) {
-        return $DB->get_records('block_annotations', ['userid' => $userid]);
+        $params['courseid'] = $courseid;
     }
 
-    return [];
+    $annotations = $DB->get_records('block_annotations', $params);
+    return $annotations;
+}
+function block_annotations_get_annotations_for_page($userid, $courseid=0) {
+    $annotations = [];
+    foreach (block_annotations_get_annotations($userid, $courseid) as $a) {
+        $annotations[$a->objecttype . '_' . $a->objectid] = $a;
+    }
+    return $annotations;
 }
 /**
  * @param $userid
+ * @param $courseid
  * @param $objectid
  * @param $objecttype
  * @param $text
  * @return stdClass
  */
-function block_annotations_add_annotation($userid, $objectid, $objecttype, $text) {
+function block_annotations_add_annotation($userid, $courseid, $objectid, $objecttype, $text) {
     global $DB;
     $annotation = new stdClass();
     $annotation->userid = $userid;
+    $annotation->courseid = $courseid;
     $annotation->objectid = $objectid;
     $annotation->objecttype = $objecttype;
     $annotation->text = $text;
@@ -105,11 +116,13 @@ function block_annotations_edit_annotation($id , $text) {
  */
 function block_annotations_delete_annotation($annotation) {
     global $DB;
+    /*
     $cached = cache::make('block_annotations', 'annotations');
     $key = block_annotations_build_cache_key($annotation);
     if ($key && $cached->has($key)) {
         $cached->delete($key);
     }
+    */
     $DB->delete_records('block_annotations', ['id' => $annotation->id]);
     return true;
 }
@@ -128,8 +141,11 @@ function block_annotations_build_cache_key($annotation) {
  * @return bool
  */
 function block_annotations_set_to_cache($annotation) {
+    /*
     $cached = cache::make('block_annotations', 'annotations');
     return $cached->set(block_annotations_build_cache_key($annotation), $annotation);
+    */
+    return true;
 }
 /**
  * This function aims to retrieve real course_section id
@@ -150,7 +166,7 @@ function block_annotations_get_realobjectid($objectid, $objecttype, $courseid) {
 function block_annotations_buildfakeobjectid($annotation) {
     global $DB;
     if ($annotation == 'course_sections') {
-        $annotation = $DB->get_field('course_sections', 'section', ['id' => $annotation->id]);
+        $annotation = $DB->get_field('course_sections', 'section', ['id' => $annotation->objectid]);
     }
     return $annotation;
 }

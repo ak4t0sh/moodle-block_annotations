@@ -49,7 +49,7 @@ switch ($mode) {
         if ($id === false) {
             throw Exception("Invalid objectid");
         }
-        $annotation = block_annotations_add_annotation($USER->id, $id, $type, $text);
+        $annotation = block_annotations_add_annotation($USER->id, $courseid, $id, $type, $text);
         break;
     case "edit" :
         $id = required_param('id', PARAM_INT);

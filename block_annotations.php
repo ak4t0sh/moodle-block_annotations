@@ -45,12 +45,13 @@ class block_annotations extends block_base {
     public function get_required_javascript() {
         global $USER;
         parent::get_required_javascript();
-        $params = [
-            'annotations' => [],
-            'courseid' => $this->page->course->id
-        ];
+
         if ($this->page->course->id > 1 ) {
-            // $annotations = block_annotations_get_annotations($USER->id, $this->page->course->id);
+            $params = [
+                'annotations' => block_annotations_get_annotations_for_page($USER->id, $this->page->course->id),
+                'courseid' => $this->page->course->id
+            ];
+
             $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $params);
         }
     }

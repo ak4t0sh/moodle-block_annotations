@@ -8,6 +8,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="objecttype" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="objectid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="text" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
@@ -18,7 +19,7 @@
       </KEYS>
         <INDEXES>
             <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
-            <INDEX NAME="user-annotations" UNIQUE="false" FIELDS="userid, objecttype, objectid, timecreated"/>
+            <INDEX NAME="user-annotations" UNIQUE="false" FIELDS="userid, courseid, objecttype, objectid, timecreated"/>
         </INDEXES>
     </TABLE>
   </TABLES>

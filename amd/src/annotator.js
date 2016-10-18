@@ -25,11 +25,12 @@
 define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], function($, ui, config, str, notification) {
     "use strict";
     var URL = config.wwwroot + '/blocks/annotations/annotate.php';
-    var BUTTON_TEXT = '';
-    var SAVE_TEXT = '';
-    var CANCEL_TEXT = '';
-    var CLOSE_TEXT = '';
-    var notes = '';
+    var VIEW_TEXT = 'view';
+    var ADD_TEXT = 'add';
+    var SAVE_TEXT = 'save';
+    var CANCEL_TEXT = 'cancel';
+    var CLOSE_TEXT = 'close';
+    var notes;
     var dialog;
 
     function save() {
@@ -55,23 +56,41 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
         return promise;
     }
     function add(element, type, id) {
-        // TODO if an annotation already exists add its id in data-id attr
+        var existingid = "";
+        var annotationskey = type + "_" + id;
+        var buttontext = ADD_TEXT;
+        if (annotationskey in notes) {
+            existingid = 'data-id="' + notes[annotationskey].id + '"';
+            buttontext = VIEW_TEXT;
+        }
         element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="' +
-             id + '" class="btn">' + BUTTON_TEXT + '</span></div>');
+             id + '" ' + existingid + ' class="btn">' + buttontext + '</span></div>');
     }
     function run() {
         $('.annotations span.btn').click(function() {
+            var idattr = $(this).attr('data-id');
+            if (typeof idattr !== typeof undefined && idattr !== false && 0 !== idattr.lenght) {
+                var annotationkey = $(this).attr('data-objecttype') + "_" + $(this).attr('data-objectid');
+                $('#block_annotations-form-id').val(idattr);
+                $('#block_annotations-form-text').html(notes[annotationkey].text);
+                $('#block_annotations-form-mode').val("edit");
+            }
+            else {
+                $('#block_annotations-form-mode').val("add");
+            }
             $('#block_annotations-form-objectid').val($(this).attr('data-objectid'));
             $('#block_annotations-form-objecttype').val($(this).attr('data-objecttype'));
             dialog.dialog('open');
         });
     }
     function init(annotations, courseid) {
+        notes = annotations;
         /*
          * Load required strings
+         * TODO see why it does not work
          */
         str.get_string('view', 'block_annotations').done(function(s) {
-            BUTTON_TEXT = s;
+            VIEW_TEXT = s;
         }).fail(notification.exception);
 
         str.get_string('save', 'block_annotations').done(function(s) {
@@ -84,13 +103,11 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             CLOSE_TEXT = s;
         }).fail(CLOSE_TEXT = 'close');
 
-        notes = annotations;
-        var mode = "add";
-        // TODO change mode if annotation exists
+        // TODO move to a template if possible.
         $('body').append('<div id="block_annotations-form" title="Create annotation">'
     + '<form>'
     + '<fieldset>'
-    + '<input id="block_annotations-form-mode" type="hidden" name="mode" value="' + mode + '"/>'
+    + '<input id="block_annotations-form-mode" type="hidden" name="mode" value=""/>'
     + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
     + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
     + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
