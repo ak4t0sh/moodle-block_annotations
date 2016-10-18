@@ -34,7 +34,6 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
     var dialog;
 
     function save() {
-        var promise = $.Deferred();
         var data = {
             mode: $('#block_annotations-form-mode').val(),
             id: $('#block_annotations-form-id').val(),
@@ -50,11 +49,15 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             data: data
         };
 
-        $.ajax(URL, settings).done(function() {
-            promise.resolve();
-        });
-
-        return promise;
+        $.ajax(URL, settings).done(function(response) {
+            $('#block_annotations-form-feedback').html('<div class="alert alert-success">Saved</div>');
+            var annotationskey = response.objecttype + "_" + response.objectid;
+            notes[annotationskey].id = response.id;
+            notes[annotationskey].text = response.text;
+            // TODO in case of addition add data-id to corresponding btn
+        }).fail(function() {
+            $('#block_annotations-form-feedback').html('<div class="alert alert-success">Failed !</div>');
+         });
     }
     function add(element, type, id) {
         var existingid = "";
@@ -119,6 +122,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
     + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
     + '</fieldset>'
     + '</form>'
+    + '<div id="block_annotations-form-feedback"></div>'
     + '</div>');
         dialog = $('#block_annotations-form').dialog({
             autoOpen: false,
@@ -140,6 +144,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             close: function() {
                 dialog.find('form')[0].reset();
                 $('#block_annotations-form-text').val("");
+                $('#block_annotations-form-feedback').html("");
             }
         });
     }
