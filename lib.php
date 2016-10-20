@@ -109,7 +109,7 @@ function block_annotations_edit_annotation($id , $text) {
     return $annotation;
 }
 /**
- * Delete and annotation entry
+ * Delete an annotation entry
  *
  * @param stdClass $annotation
  * @return bool true
@@ -119,7 +119,7 @@ function block_annotations_delete_annotation($annotation) {
 
     $cached = cache::make('block_annotations', 'annotations');
     if (!$cached->delete($annotation->id)) {
-        error_log(get_string('cache_clean_failed', 'block_annotations', $annotation));
+        error_log(get_string('cache_delete_failed', 'block_annotations', $annotation));
         return false;
     }
 
@@ -156,6 +156,7 @@ function block_annotations_set_to_cache($annotation) {
 
     // on fail clear all entries to keep consistent cache.
     if ($result !== 3) {
+        error_log(get_string('cache_set_failed', 'block_annotations', $annotation));
         $cached->delete_many(
             $annotation->id,
             'user_'.$annotation->userid,
