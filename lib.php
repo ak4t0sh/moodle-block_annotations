@@ -35,7 +35,6 @@ function block_annotations_get_annotation($userid, $objectid, $objecttype) {
     $fakeannotation->userid = $userid;
     $fakeannotation->objectid = $objectid;
     $fakeannotation->objecttype = $objecttype;
-    $key = block_annotations_build_cache_key($fakeannotation);
 /*
     $cached = cache::make('block_annotations', 'annotations');
     if ($key && $cached->has($key)) {
@@ -52,7 +51,7 @@ function block_annotations_get_annotation($userid, $objectid, $objecttype) {
 }
 function block_annotations_get_annotations($userid, $courseid=0) {
     global $DB;
-    // TODO
+    // TODO replace by using user and course annotation cache list.
     /*
     $cached = cache::make('block_annotations', 'annotations');
 
@@ -117,24 +116,15 @@ function block_annotations_edit_annotation($id , $text) {
  */
 function block_annotations_delete_annotation($annotation) {
     global $DB;
-    /*
+
     $cached = cache::make('block_annotations', 'annotations');
-    $key = block_annotations_build_cache_key($annotation);
-    if ($key && $cached->has($key)) {
-        $cached->delete($key);
+    if (!$cached->delete($annotation->id)) {
+        error_log(get_string('cache_clean_failed', 'block_annotations', $annotation));
+        return false;
     }
-    */
+
     $DB->delete_records('block_annotations', ['id' => $annotation->id]);
     return true;
-}
-/**
- * Build associate cache key for an annotation
- *
- * @param stdClass $annotation
- * @return string
- */
-function block_annotations_build_cache_key($annotation) {
-    return $annotation->userid.'_'.$annotation->objecttype.'_'.$annotation->objectid;
 }
 /**
  * Add or update an annotation into cache
@@ -142,11 +132,14 @@ function block_annotations_build_cache_key($annotation) {
  * @return bool
  */
 function block_annotations_set_to_cache($annotation) {
-    /*
+
     $cached = cache::make('block_annotations', 'annotations');
-    return $cached->set(block_annotations_build_cache_key($annotation), $annotation);
-    */
-    return true;
+    if ($cached->set($annotation->id, $annotation)) {
+        // TODO update user annotation list in cache.
+        // TODO update course annotation list in cache.
+        // TODO if one of previous TODO fails delete from cache and return false.
+    }
+    return false;
 }
 /**
  * This function aims to retrieve real course_section id
