@@ -134,12 +134,36 @@ function block_annotations_delete_annotation($annotation) {
 function block_annotations_set_to_cache($annotation) {
 
     $cached = cache::make('block_annotations', 'annotations');
-    if ($cached->set($annotation->id, $annotation)) {
-        // TODO update user annotation list in cache.
-        // TODO update course annotation list in cache.
-        // TODO if one of previous TODO fails delete from cache and return false.
+
+    // get user cache.
+    if (($usercache = $cached->get('user_'.$annotation->userid)) === false) {
+        $usercache = [];
     }
-    return false;
+    $usercache[] = $annotation->id;
+
+    // get course cache.
+    if (($coursecache = $cached->get('course_'.$annotation->userid)) === false) {
+        $coursecache = [];
+    }
+    $coursecache[] = $annotation->id;
+
+    // set caches.
+    $result = $cached->set_many([
+        $annotation->id => $annotation,
+        'user_'.$annotation->userid => $usercache,
+        'course_'.$annotation->userid => $coursecache,
+    ]);
+
+    // on fail clear all entries to keep consistent cache.
+    if ($result !== 3) {
+        $cached->delete_many(
+            $annotation->id,
+            'user_'.$annotation->userid,
+            'course_'.$annotation->courseid
+        );
+        return false;
+    }
+    return true;
 }
 /**
  * This function aims to retrieve real course_section id
