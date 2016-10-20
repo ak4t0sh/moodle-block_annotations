@@ -43,17 +43,7 @@ class block_annotations extends block_base {
      * Gets required Javascript
      */
     public function get_required_javascript() {
-        global $USER;
         parent::get_required_javascript();
-
-        if ($this->page->course->id > 1  && $this->is_valid_course_format($this->page->course->format)) {
-            $params = [
-                'annotations' => block_annotations_get_annotations_for_page($USER->id, $this->page->course->id),
-                'courseid' => $this->page->course->id
-            ];
-
-            $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $params);
-        }
     }
     /**
      * Return the content of this block.
@@ -61,10 +51,20 @@ class block_annotations extends block_base {
      * @return stdClass the content
      */
     public function get_content() {
+        global $USER;
         if ($this->content !== null) {
             return $this->content;
         }
-        $this->page->requires->css('/lib/jquery/ui-1.11.4/jquery-ui.min.css');
+        if ($this->page->course->id > 1  && $this->is_valid_course_format($this->page->course->format)) {
+            $this->page->requires->css('/lib/jquery/ui-1.11.4/jquery-ui.min.css');
+            $params = [
+                'annotations' => block_annotations_get_annotations_for_page($USER->id, $this->page->course->id),
+                'courseid' => $this->page->course->id
+            ];
+
+            $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $params);
+        }
+
         $this->content = new stdClass();
         $this->content->text = 'test';
         $this->content->footer = '';
