@@ -40,12 +40,6 @@ class block_annotations extends block_base {
         return false;
     }
     /**
-     * Gets required Javascript
-     */
-    public function get_required_javascript() {
-        parent::get_required_javascript();
-    }
-    /**
      * Return the content of this block.
      *
      * @return stdClass the content
