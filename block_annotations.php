@@ -58,11 +58,11 @@ class block_annotations extends block_base {
 
             $this->page->requires->js_call_amd(block_annotations_resolve_amd($this->page->course), 'init', $params);
         }
-
-        $this->content = new stdClass();
-        $this->content->text = 'test';
-        $this->content->footer = '';
-
+        $output = $this->page->get_renderer('block_annotations');
+        $this->content = (object)[
+            'text' => $output->content_text(),
+            'footer' => $output->content_footer(),
+        ];
         return $this->content;
     }
     public function is_valid_course_format($format) {
