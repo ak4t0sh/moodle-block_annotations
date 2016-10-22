@@ -59,12 +59,12 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/str'],
                     annotations[annotationkey] = response;
                     $('#block_annotations-form-id').val(response.id);
                     $('#block_annotations-form-mode').val("edit");
-                    // TODO in case of addition add data-id to corresponding btn
+                    // TODO in case of addition add data-id to corresponding btn.
                 }
                 annotations[annotationkey].text = $('#block_annotations-form-text').val();
             }).fail(function () {
                     $('#block_annotations-form-feedback').html('<div class="alert alert-error">Failed !</div>');
-                });
+            });
         }
 
         function add(element, type, id) {
@@ -75,8 +75,8 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/str'],
                 existingid = 'data-id="' + annotations[annotationkey].id + '"';
                 buttontext = VIEW_TEXT;
             }
-            element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="' +
-                id + '" ' + existingid + ' class="btn">' + buttontext + '</span></div>');
+            element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="'
+                 + id + '" ' + existingid + ' class="btn">' + buttontext + '</span></div>');
         }
 
         function run() {
@@ -126,8 +126,8 @@ define(['jquery', 'jqueryui', 'core/ajax', 'core/str'],
                 + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
                 + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
                 + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
-                + '<textarea name="text" id="block_annotations-form-text" ' +
-                'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
+                + '<textarea name="text" id="block_annotations-form-text" '
+                + 'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
                 + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
                 + '</fieldset>'
                 + '</form>'

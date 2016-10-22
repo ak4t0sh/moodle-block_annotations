@@ -21,6 +21,7 @@
  * @copyright  2016 Arnaud Trouvé <ak4t0sh@free.fr>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die();
 
 $functions = [
     'block_annotations_annotate' => [
@@ -29,7 +30,7 @@ $functions = [
         'classpath'   => '',
         'description' => 'Add/edit an annotation.',
         'type'        => 'write',
-        'capabilities'=> '',
+        'capabilities' => '',
         'ajax'        => true,
         'loginrequired' => true
     ]

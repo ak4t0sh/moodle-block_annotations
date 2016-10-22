@@ -127,26 +127,26 @@ function block_annotations_set_to_cache($annotation) {
 
     $cached = cache::make('block_annotations', 'annotations');
 
-    // get user cache.
+    // Get user cache.
     if (($usercache = $cached->get('user_'.$annotation->userid)) === false) {
         $usercache = [];
     }
     $usercache[] = $annotation->id;
 
-    // get course cache.
+    // Get course cache.
     if (($coursecache = $cached->get('course_'.$annotation->userid)) === false) {
         $coursecache = [];
     }
     $coursecache[] = $annotation->id;
 
-    // set caches.
+    // Set caches.
     $result = $cached->set_many([
         $annotation->id => $annotation,
         'user_'.$annotation->userid => $usercache,
         'course_'.$annotation->userid => $coursecache,
     ]);
 
-    // on fail clear all entries to keep consistent cache.
+    // On fail clear all entries to keep consistent cache.
     if ($result !== 3) {
         $cached->delete_many(
             $annotation->id,
@@ -182,7 +182,7 @@ function block_annotations_buildfakeobjectid($annotation) {
 }
 function block_annotations_get_available_amd_by_format() {
     return [
-      'topics' =>  'block_annotations/format_topics'
+      'topics' => 'block_annotations/format_topics'
     ];
 }
 function block_annotations_resolve_amd($course) {
