@@ -22,12 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['pluginname'] = 'Annotations';
 $string['annotations:addinstance'] = 'Add a new Annotations block';
 $string['annotations:myaddinstance'] = 'Add a new Annotations block to Dashboard';
-$string['pluginname'] = 'Annotations';
-$string['view'] = 'View';
-$string['save']='Save';
-$string['cancel']='Cancel';
-$string['close']='Close';
-$string['cache_set_failed']='Failed to set annotation {$a->id} into cache.';
-$string['cache_delete_failed']='Failed to delete annotation {$a->id} from cache.';
+$string['dialog_title'] = 'Add or update my annotation';

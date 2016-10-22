@@ -22,138 +22,145 @@
 /**
  * @module block_annotations/annotator
  */
-define(['jquery', 'jqueryui','core/ajax', 'core/str', 'core/notification'],
-    function($, ui, ajax, str, notification) {
-    "use strict";
-    var VIEW_TEXT = 'view';
-    var ADD_TEXT = 'add';
-    var SAVE_TEXT = 'save';
-    var CANCEL_TEXT = 'cancel';
-    var annotations;
-    var dialog;
+define(['jquery', 'jqueryui', 'core/ajax', 'core/str'],
+    function ($, ui, ajax, str) {
+        "use strict";
+        var DIALOG_TITLE = "add or update my annotation";
+        var DIALOG_EDIT_TEXT = 'edit';
+        var DIALOG_CANCEL_TEXT = 'cancel';
+        var VIEW_TEXT = 'view';
+        var ADD_TEXT = 'add';
+        var annotations;
+        var dialog;
 
-    function save() {
-        var data = {
-            mode: $('#block_annotations-form-mode').val(),
-            objectid: $('#block_annotations-form-objectid').val(),
-            objecttype: $('#block_annotations-form-objecttype').val(),
-            text: $('#block_annotations-form-text').val(),
-            courseid: $('#block_annotations-form-courseid').val()
-        };
+        function save() {
+            var data = {
+                mode: $('#block_annotations-form-mode').val(),
+                objectid: $('#block_annotations-form-objectid').val(),
+                objecttype: $('#block_annotations-form-objecttype').val(),
+                text: $('#block_annotations-form-text').val(),
+                courseid: $('#block_annotations-form-courseid').val()
+            };
 
-        if ($('#block_annotations-form-id').val() !== '') {
-            data.id = $('#block_annotations-form-id').val();
-        }
-        var promises = ajax.call([
-            {
-                methodname: 'block_annotations_annotate',
-                args: data
+            if ($('#block_annotations-form-id').val() !== '') {
+                data.id = $('#block_annotations-form-id').val();
             }
-        ]);
-        promises[0].done(function(response) {
-            $('#block_annotations-form-feedback').html('<div class="alert alert-success">Saved</div>');
-            var annotationkey = response.objecttype + "_" + response.objectid;
-
-            if (!(annotationkey in annotations)) {
-                annotations[annotationkey] = response;
-                $('#block_annotations-form-id').val(response.id);
-                $('#block_annotations-form-mode').val("edit");
-                // TODO in case of addition add data-id to corresponding btn
-            }
-            annotations[annotationkey].text = $('#block_annotations-form-text').val();
-        }).fail(function() {
-                $('#block_annotations-form-feedback').html('<div class="alert alert-error">Failed !</div>');
-            });
-    }
-    function add(element, type, id) {
-        var existingid = "";
-        var annotationkey = type + "_" + id;
-        var buttontext = ADD_TEXT;
-        if (annotationkey in annotations) {
-            existingid = 'data-id="' + annotations[annotationkey].id + '"';
-            buttontext = VIEW_TEXT;
-        }
-        element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="' +
-             id + '" ' + existingid + ' class="btn">' + buttontext + '</span></div>');
-    }
-    function run() {
-        $('.annotations span.btn').click(function() {
-            var idattr = $(this).attr('data-id');
-            if (typeof idattr !== typeof undefined && idattr !== false && 0 !== idattr.lenght) {
-                var annotationkey = $(this).attr('data-objecttype') + "_" + $(this).attr('data-objectid');
-                $('#block_annotations-form-id').val(idattr);
-                $('#block_annotations-form-text').val(annotations[annotationkey].text);
-                $('#block_annotations-form-mode').val("edit");
-            }
-            else {
-                $('#block_annotations-form-mode').val("add");
-            }
-            $('#block_annotations-form-objectid').val($(this).attr('data-objectid'));
-            $('#block_annotations-form-objecttype').val($(this).attr('data-objecttype'));
-            dialog.dialog('open');
-        });
-    }
-    function init(existingannotations, courseid) {
-        annotations = existingannotations;
-        /*
-         * Load required strings
-         * TODO see why it does not work
-         */
-        str.get_string('view', 'block_annotations').done(function(s) {
-            VIEW_TEXT = s;
-        }).fail(notification.exception);
-
-        str.get_string('save', 'block_annotations').done(function(s) {
-            SAVE_TEXT = s;
-        }).fail(SAVE_TEXT = 'save');
-        str.get_string('cancel', 'block_annotations').done(function(s) {
-            CANCEL_TEXT = s;
-        }).fail(CANCEL_TEXT = 'cancel');
-
-        // TODO move to a template if possible.
-        $('body').append('<div id="block_annotations-form" title="Create annotation">'
-        + '<form>'
-        + '<fieldset>'
-        + '<input id="block_annotations-form-mode" type="hidden" name="mode" value=""/>'
-        + '<input id="block_annotations-form-id" type="hidden" name="id" value=""/>'
-        + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
-        + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
-        + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
-        + '<label for="annotation">Annotation</label>'
-        + '<textarea name="text" id="block_annotations-form-text" ' +
-                'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
-        + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
-        + '</fieldset>'
-        + '</form>'
-        + '<div id="block_annotations-form-feedback"></div>'
-        + '</div>');
-        dialog = $('#block_annotations-form').dialog({
-            autoOpen: false,
-            height: 400,
-            width: 350,
-            modal: true,
-            buttons: [
-                 {
-                     text: SAVE_TEXT,
-                     click: save
-                 },
+            var promises = ajax.call([
                 {
-                    text: CANCEL_TEXT,
-                    click: function() {
-                        dialog.dialog('close');
-                    }
+                    methodname: 'block_annotations_annotate',
+                    args: data
                 }
-            ],
-            close: function() {
-                dialog.find('form')[0].reset();
-                $('#block_annotations-form-text').val("");
-                $('#block_annotations-form-feedback').html("");
+            ]);
+            promises[0].done(function (response) {
+                $('#block_annotations-form-feedback').html('<div class="alert alert-success">Saved</div>');
+                var annotationkey = response.objecttype + "_" + response.objectid;
+
+                if (!(annotationkey in annotations)) {
+                    annotations[annotationkey] = response;
+                    $('#block_annotations-form-id').val(response.id);
+                    $('#block_annotations-form-mode').val("edit");
+                    // TODO in case of addition add data-id to corresponding btn
+                }
+                annotations[annotationkey].text = $('#block_annotations-form-text').val();
+            }).fail(function () {
+                    $('#block_annotations-form-feedback').html('<div class="alert alert-error">Failed !</div>');
+                });
+        }
+
+        function add(element, type, id) {
+            var existingid = "";
+            var annotationkey = type + "_" + id;
+            var buttontext = ADD_TEXT;
+            if (annotationkey in annotations) {
+                existingid = 'data-id="' + annotations[annotationkey].id + '"';
+                buttontext = VIEW_TEXT;
             }
-        });
-    }
-    return {
-        add: add,
-        init: init,
-        run: run
-    };
-});
+            element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="' +
+                id + '" ' + existingid + ' class="btn">' + buttontext + '</span></div>');
+        }
+
+        function run() {
+            $('.annotations span.btn').click(function () {
+                var idattr = $(this).attr('data-id');
+                if (typeof idattr !== typeof undefined && idattr !== false && 0 !== idattr.lenght) {
+                    var annotationkey = $(this).attr('data-objecttype') + "_" + $(this).attr('data-objectid');
+                    $('#block_annotations-form-id').val(idattr);
+                    $('#block_annotations-form-text').val(annotations[annotationkey].text);
+                    $('#block_annotations-form-mode').val("edit");
+                }
+                else {
+                    $('#block_annotations-form-mode').val("add");
+                }
+                $('#block_annotations-form-objectid').val($(this).attr('data-objectid'));
+                $('#block_annotations-form-objecttype').val($(this).attr('data-objecttype'));
+                dialog.dialog('open');
+            });
+        }
+
+        function init(existingannotations, courseid) {
+            annotations = existingannotations;
+            /*
+             * Load required strings
+             * TODO see why it does not work
+             */
+            str.get_strings([
+                    {key: 'add'},
+                    {key: 'view'},
+                    {key: 'edit'},
+                    {key: 'cancel'},
+                    {key: 'dialog_title', component: 'block_annotations'}
+                ]).done(function (s) {
+                    ADD_TEXT = s[0];
+                    VIEW_TEXT = s[1];
+                    DIALOG_EDIT_TEXT = s[2];
+                    DIALOG_CANCEL_TEXT = s[3];
+                    DIALOG_TITLE = s[4];
+                });
+
+            // TODO move to a template if possible.
+            $('body').append('<div id="block_annotations-form" title="' + DIALOG_TITLE + '">'
+                + '<form>'
+                + '<fieldset>'
+                + '<input id="block_annotations-form-mode" type="hidden" name="mode" value=""/>'
+                + '<input id="block_annotations-form-id" type="hidden" name="id" value=""/>'
+                + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
+                + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
+                + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
+                + '<textarea name="text" id="block_annotations-form-text" ' +
+                'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
+                + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
+                + '</fieldset>'
+                + '</form>'
+                + '<div id="block_annotations-form-feedback"></div>'
+                + '</div>');
+            dialog = $('#block_annotations-form').dialog({
+                autoOpen: false,
+                height: 400,
+                width: 350,
+                modal: true,
+                buttons: [
+                    {
+                        text: DIALOG_EDIT_TEXT,
+                        click: save
+                    },
+                    {
+                        text: DIALOG_CANCEL_TEXT,
+                        click: function () {
+                            dialog.dialog('close');
+                        }
+                    }
+                ],
+                close: function () {
+                    dialog.find('form')[0].reset();
+                    $('#block_annotations-form-text').val("");
+                    $('#block_annotations-form-feedback').html("");
+                }
+            });
+        }
+
+        return {
+            add: add,
+            init: init,
+            run: run
+        };
+    });
