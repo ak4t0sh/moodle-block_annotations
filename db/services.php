@@ -15,15 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Block annotations webservice definitions.
  *
  * @package    block_annotations
  * @copyright  2016 Arnaud Trouvé <ak4t0sh@free.fr>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$functions = [
+    'block_annotations_annotate' => [
+        'classname'   => 'block_annotations\external',
+        'methodname'  => 'annotate',
+        'classpath'   => '',
+        'description' => 'Add/edit an annotation.',
+        'type'        => 'write',
+        'capabilities'=> '',
+        'ajax'        => true,
+        'loginrequired' => true
+    ]
+];
 
-$plugin->version   = 2016102000;
-$plugin->requires  = 2015111000;
-$plugin->component = 'block_annotations';

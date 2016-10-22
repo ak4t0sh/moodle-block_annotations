@@ -22,49 +22,55 @@
 /**
  * @module block_annotations/annotator
  */
-define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], function($, ui, config, str, notification) {
+define(['jquery', 'jqueryui','core/ajax', 'core/str', 'core/notification'],
+    function($, ui, ajax, str, notification) {
     "use strict";
-    var URL = config.wwwroot + '/blocks/annotations/annotate.php';
     var VIEW_TEXT = 'view';
     var ADD_TEXT = 'add';
     var SAVE_TEXT = 'save';
     var CANCEL_TEXT = 'cancel';
-    var CLOSE_TEXT = 'close';
-    var notes;
+    var annotations;
     var dialog;
 
     function save() {
         var data = {
             mode: $('#block_annotations-form-mode').val(),
-            id: $('#block_annotations-form-id').val(),
             objectid: $('#block_annotations-form-objectid').val(),
             objecttype: $('#block_annotations-form-objecttype').val(),
             text: $('#block_annotations-form-text').val(),
-            courseid: $('#block_annotations-form-courseid').val(),
-            sesskey: config.sesskey
-        };
-        var settings = {
-            type: 'POST',
-            dataType: 'json',
-            data: data
+            courseid: $('#block_annotations-form-courseid').val()
         };
 
-        $.ajax(URL, settings).done(function(response) {
+        if ($('#block_annotations-form-id').val() !== '') {
+            data.id = $('#block_annotations-form-id').val();
+        }
+        var promises = ajax.call([
+            {
+                methodname: 'block_annotations_annotate',
+                args: data
+            }
+        ]);
+        promises[0].done(function(response) {
             $('#block_annotations-form-feedback').html('<div class="alert alert-success">Saved</div>');
-            var annotationskey = response.objecttype + "_" + response.objectid;
-            notes[annotationskey].id = response.id;
-            notes[annotationskey].text = response.text;
-            // TODO in case of addition add data-id to corresponding btn
+            var annotationkey = response.objecttype + "_" + response.objectid;
+
+            if (!(annotationkey in annotations)) {
+                annotations[annotationkey] = response;
+                $('#block_annotations-form-id').val(response.id);
+                $('#block_annotations-form-mode').val("edit");
+                // TODO in case of addition add data-id to corresponding btn
+            }
+            annotations[annotationkey].text = $('#block_annotations-form-text').val();
         }).fail(function() {
-            $('#block_annotations-form-feedback').html('<div class="alert alert-success">Failed !</div>');
-         });
+                $('#block_annotations-form-feedback').html('<div class="alert alert-error">Failed !</div>');
+            });
     }
     function add(element, type, id) {
         var existingid = "";
-        var annotationskey = type + "_" + id;
+        var annotationkey = type + "_" + id;
         var buttontext = ADD_TEXT;
-        if (annotationskey in notes) {
-            existingid = 'data-id="' + notes[annotationskey].id + '"';
+        if (annotationkey in annotations) {
+            existingid = 'data-id="' + annotations[annotationkey].id + '"';
             buttontext = VIEW_TEXT;
         }
         element.append('<div class="annotations"><span data-objecttype="' + type + '" data-objectid="' +
@@ -76,7 +82,7 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             if (typeof idattr !== typeof undefined && idattr !== false && 0 !== idattr.lenght) {
                 var annotationkey = $(this).attr('data-objecttype') + "_" + $(this).attr('data-objectid');
                 $('#block_annotations-form-id').val(idattr);
-                $('#block_annotations-form-text').val(notes[annotationkey].text);
+                $('#block_annotations-form-text').val(annotations[annotationkey].text);
                 $('#block_annotations-form-mode').val("edit");
             }
             else {
@@ -87,8 +93,8 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
             dialog.dialog('open');
         });
     }
-    function init(annotations, courseid) {
-        notes = annotations;
+    function init(existingannotations, courseid) {
+        annotations = existingannotations;
         /*
          * Load required strings
          * TODO see why it does not work
@@ -103,27 +109,24 @@ define(['jquery', 'jqueryui','core/config', 'core/str', 'core/notification'], fu
         str.get_string('cancel', 'block_annotations').done(function(s) {
             CANCEL_TEXT = s;
         }).fail(CANCEL_TEXT = 'cancel');
-        str.get_string('close', 'block_annotations').done(function(s) {
-            CLOSE_TEXT = s;
-        }).fail(CLOSE_TEXT = 'close');
 
         // TODO move to a template if possible.
         $('body').append('<div id="block_annotations-form" title="Create annotation">'
-    + '<form>'
-    + '<fieldset>'
-    + '<input id="block_annotations-form-mode" type="hidden" name="mode" value=""/>'
-    + '<input id="block_annotations-form-id" type="hidden" name="id" value=""/>'
-    + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
-    + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
-    + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
-    + '<label for="annotation">Annotation</label>'
-    + '<textarea name="text" id="block_annotations-form-text" ' +
-            'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
-    + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
-    + '</fieldset>'
-    + '</form>'
-    + '<div id="block_annotations-form-feedback"></div>'
-    + '</div>');
+        + '<form>'
+        + '<fieldset>'
+        + '<input id="block_annotations-form-mode" type="hidden" name="mode" value=""/>'
+        + '<input id="block_annotations-form-id" type="hidden" name="id" value=""/>'
+        + '<input id="block_annotations-form-objectid" type="hidden" name="objectid" value=""/>'
+        + '<input id="block_annotations-form-objecttype" type="hidden" name="objecttype" value=""/>'
+        + '<input id="block_annotations-form-courseid" type="hidden" name="courseid" value="' + courseid + '"/>'
+        + '<label for="annotation">Annotation</label>'
+        + '<textarea name="text" id="block_annotations-form-text" ' +
+                'class="text ui-widget-content ui-corner-all" style="width: 300px; height: 150px;"></textarea>'
+        + '<input type="submit" tabindex="-1" style="position:absolute; top:-1000px">'
+        + '</fieldset>'
+        + '</form>'
+        + '<div id="block_annotations-form-feedback"></div>'
+        + '</div>');
         dialog = $('#block_annotations-form').dialog({
             autoOpen: false,
             height: 400,
