@@ -24,26 +24,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * @param $userid
- * @param int $objectid
- * @param int $objecttype
- * @return false|stdClass
+ * Find annotations for given user and course
+ *
+ * @param int $userid
+ * @param int $courseid
+ * @return array
  */
-function block_annotations_get_annotation($userid, $objectid, $objecttype) {
-    global $DB;
-    $fakeannotation = new stdClass();
-    $fakeannotation->userid = $userid;
-    $fakeannotation->objectid = $objectid;
-    $fakeannotation->objecttype = $objecttype;
-
-    $annotation = $DB->get_record('block_annotations', [
-        'user' => $userid,
-        'objectid' => $objectid,
-        'objecttype' => $objecttype
-    ]);
-    block_annotations_set_to_cache($annotation);
-    return $annotation;
-}
 function block_annotations_get_annotations($userid, $courseid) {
     global $DB;
     $cached = cache::make('block_annotations', 'annotations');
@@ -60,7 +46,15 @@ function block_annotations_get_annotations($userid, $courseid) {
     }
     return $annotations;
 }
-function block_annotations_get_annotations_for_page($userid, $courseid=0) {
+/**
+ * Find annotations for given user and course
+ * And process the result to be used by JavaScript
+ *
+ * @param int $userid
+ * @param int $courseid
+ * @return array
+ */
+function block_annotations_get_annotations_for_page($userid, $courseid) {
     $annotations = [];
     foreach (block_annotations_get_annotations($userid, $courseid) as $annotation) {
         $annotation->objectid = block_annotations_buildfakeobjectid($annotation);
@@ -69,6 +63,8 @@ function block_annotations_get_annotations_for_page($userid, $courseid=0) {
     return $annotations;
 }
 /**
+ * Add an annotation
+ *
  * @param int $userid
  * @param int $courseid
  * @param int $objectid
@@ -89,7 +85,9 @@ function block_annotations_add_annotation($userid, $courseid, $objectid, $object
     return $annotation;
 }
 /**
- * @param $id
+ * Update an annotation
+ *
+ * @param int $id
  * @param string $text
  * @return stdClass $annotation
  */
@@ -110,6 +108,7 @@ function block_annotations_edit_annotation($id , $text) {
 function block_annotations_delete_annotation($annotation) {
     global $DB;
 
+    // TODO : move cache management to another function.
     $cached = cache::make('block_annotations', 'annotations');
     if (!$cached->delete($annotation->id)) {
         return false;
@@ -173,6 +172,13 @@ function block_annotations_get_realobjectid($objectid, $objecttype, $courseid) {
     }
     return $objectid;
 }
+/**
+ * Return the "local" id for an object.
+ * Mainly useful for course_section
+ *
+ * @param stdClass $annotation
+ * @return int
+ */
 function block_annotations_buildfakeobjectid($annotation) {
     global $DB;
     if ($annotation->objecttype == 'course_sections') {
@@ -180,11 +186,22 @@ function block_annotations_buildfakeobjectid($annotation) {
     }
     return $annotation->objectid;
 }
+/**
+ * Return a list of supported course_format
+ *
+ * @return array
+ */
 function block_annotations_get_available_amd_by_format() {
     return [
       'topics' => 'block_annotations/format_topics'
     ];
 }
+/**
+ * Return which AMD module to use for a given course_format
+ *
+ * @param stdClass $course
+ * @return string
+ */
 function block_annotations_resolve_amd($course) {
     return block_annotations_get_available_amd_by_format()[$course->format];
 }
