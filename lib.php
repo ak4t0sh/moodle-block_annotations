@@ -35,12 +35,7 @@ function block_annotations_get_annotation($userid, $objectid, $objecttype) {
     $fakeannotation->userid = $userid;
     $fakeannotation->objectid = $objectid;
     $fakeannotation->objecttype = $objecttype;
-/*
-    $cached = cache::make('block_annotations', 'annotations');
-    if ($key && $cached->has($key)) {
-        return $cached->get($key);
-    }
-*/
+
     $annotation = $DB->get_record('block_annotations', [
         'user' => $userid,
         'objectid' => $objectid,
@@ -49,38 +44,36 @@ function block_annotations_get_annotation($userid, $objectid, $objecttype) {
     block_annotations_set_to_cache($annotation);
     return $annotation;
 }
-function block_annotations_get_annotations($userid, $courseid=0) {
+function block_annotations_get_annotations($userid, $courseid) {
     global $DB;
-    // TODO replace by using user and course annotation cache list.
-    /*
     $cached = cache::make('block_annotations', 'annotations');
+    $userannotations = $cached->get('user_' . $userid);
+    $courseannotations = $cached->get('course_' . $courseid);
 
-    $key = block_annotations_build_cache_key($fakeannotation);
-    if ($key && $cached->has($key))
-        return $cached->get($key);
-    */
-    $params = ['userid' => $userid];
-    if (!$courseid) {
-        $params['courseid'] = $courseid;
+    if (($userannotations !== false) && ($courseannotations !== false)) {
+        return $cached->get_many(array_intersect($userannotations, $courseannotations));
     }
 
-    $annotations = $DB->get_records('block_annotations', $params);
+    $annotations = $DB->get_records('block_annotations', ['userid' => $userid, 'courseid' => $courseid]);
+    foreach ($annotations as $annotation) {
+        block_annotations_set_to_cache($annotation);
+    }
     return $annotations;
 }
 function block_annotations_get_annotations_for_page($userid, $courseid=0) {
     $annotations = [];
-    foreach (block_annotations_get_annotations($userid, $courseid) as $a) {
-        $a->objectid = block_annotations_buildfakeobjectid($a);
-        $annotations[$a->objecttype . '_' . $a->objectid] = $a;
+    foreach (block_annotations_get_annotations($userid, $courseid) as $annotation) {
+        $annotation->objectid = block_annotations_buildfakeobjectid($annotation);
+        $annotations[$annotation->objecttype . '_' . $annotation->objectid] = $annotation;
     }
     return $annotations;
 }
 /**
- * @param $userid
- * @param $courseid
- * @param $objectid
- * @param $objecttype
- * @param $text
+ * @param int $userid
+ * @param int $courseid
+ * @param int $objectid
+ * @param string $objecttype
+ * @param string $text
  * @return stdClass
  */
 function block_annotations_add_annotation($userid, $courseid, $objectid, $objecttype, $text) {
