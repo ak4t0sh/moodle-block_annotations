@@ -50,7 +50,6 @@ class block_annotations extends block_base {
             return $this->content;
         }
         if ($this->page->course->id > 1  && $this->is_valid_course_format($this->page->course->format)) {
-            $this->page->requires->css('/lib/jquery/ui-1.11.4/jquery-ui.min.css');
             $params = [
                 'annotations' => block_annotations_get_annotations_for_page($USER->id, $this->page->course->id),
                 'courseid' => $this->page->course->id
